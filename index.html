@@ -517,7 +517,7 @@
         </div>
 
         <div class="footer-note" id="footerNote">
-          “Incorrecto” elimina esa pregunta de la ronda. “Pasapalabra” la deja pendiente para volver a ella después. El temporizador dura 5 minutos.
+          “Incorrecto” elimina esa pregunta de la ronda. “Pasapalabra” la deja pendiente para volver a ella después. El temporizador dura 10 minutos.
         </div>
       </div>
     </div>
@@ -943,7 +943,7 @@
       finalIncorrect.textContent = stats.incorrect;
       finalPending.textContent = stats.pending;
       finalReason.textContent = reason === 'time'
-        ? 'Se acabó el tiempo de 5 minutos. Usa el código para seguir con el Escape Room.'
+        ? 'Se acabó el tiempo de 10 minutos. Usa el código para seguir con el Escape Room.'
         : 'Ya no quedan preguntas pendientes. Usa el código para seguir con el Escape Room.';
       finalMessage.textContent = getFinalMessage(stats, reason);
       finalCode.textContent = getFinalCode() || '----';
