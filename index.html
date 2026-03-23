@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -559,18 +559,13 @@
 
     // Reemplaza este objeto con la configuración real de tu proyecto Firebase.
     // Puedes obtenerlo al registrar una app web en Firebase Console.
-   const firebaseConfig = {
-  apiKey: "AIzaSyCbtBUg3Wf8kBZyXfOTqMjbMLzvKgCs714",
-  authDomain: "pasalacabra-b3c5c.firebaseapp.com",
-  projectId: "pasalacabra-b3c5c",
-  storageBucket: "pasalacabra-b3c5c.firebasestorage.app",
-  messagingSenderId: "291983918565",
-  appId: "1:291983918565:web:703b0585c4661a3e6b5b0c"
-};
+    const firebaseConfig = { apiKey: "AIzaSyCbtBUg3Wf8kBZyXfOTqMjbMLzvKgCs714", authDomain: "pasalacabra-b3c5c.firebaseapp.com", projectId: "pasalacabra-b3c5c", storageBucket: "pasalacabra-b3c5c.firebasestorage.app", messagingSenderId: "291983918565", appId: "1:291983918565:web:703b0585c4661a3e6b5b0c" };
+
     const firebaseConfigured = !Object.values(firebaseConfig).some(value => String(value).startsWith('PEGA_AQUI'));
 
     const letters = ['A','B','C','D','E','F','G','H','I','J','L','M','N','O','P','Q','R','S','T','U','V','X','Y','Z'];
-    const GAME_DURATION = 10 * 60;
+    const STORAGE_KEY = 'pasapalabra_multidispositivo_local_v1';
+    const GAME_DURATION = 5 * 60;
     const params = new URLSearchParams(window.location.search);
     const mode = params.get('mode') === 'player' ? 'player' : 'host';
     const isHost = mode === 'host';
@@ -667,6 +662,38 @@
           status: 'unused'
         };
       });
+    }
+
+    function saveLocalConfig() {
+      const payload = {};
+      letters.forEach(letter => {
+        payload[letter] = {
+          hintType: gameData[letter].hintType,
+          question: gameData[letter].question,
+          answer: gameData[letter].answer,
+          codeDigit: gameData[letter].codeDigit
+        };
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    }
+
+    function loadLocalConfig() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      try {
+        const saved = JSON.parse(raw);
+        letters.forEach(letter => {
+          if (saved[letter]) {
+            gameData[letter].hintType = saved[letter].hintType || 'con';
+            gameData[letter].question = saved[letter].question || '';
+            gameData[letter].answer = saved[letter].answer || '';
+            gameData[letter].codeDigit = saved[letter].codeDigit || '';
+            gameData[letter].status = gameData[letter].question ? 'pending' : 'unused';
+          }
+        });
+      } catch (error) {
+        console.error('No se pudo cargar la configuración guardada.', error);
+      }
     }
 
     function buildLetterSelector() {
@@ -991,6 +1018,7 @@
       playerLinkPreview.textContent = getPlayerLink();
       history.replaceState({}, '', `${window.location.pathname}?room=${encodeURIComponent(roomId)}`);
       await listenToRoom();
+      saveLocalConfig();
       await pushStateToFirebase();
     }
 
@@ -1030,7 +1058,8 @@
           await endGame('time');
           return;
         }
-        await pushStateToFirebase();
+        saveLocalConfig();
+      await pushStateToFirebase();
       }, 1000);
     }
 
@@ -1049,6 +1078,7 @@
       renderRosco();
       updateCounts();
       alert(`Letra ${letter} guardada.`);
+      saveLocalConfig();
       await pushStateToFirebase();
     }
 
@@ -1066,6 +1096,7 @@
       if (!started) gameData[letter].status = 'unused';
       renderRosco();
       updateCounts();
+      saveLocalConfig();
       await pushStateToFirebase();
     }
 
@@ -1089,6 +1120,7 @@
       currentIndex = findNextPendingIndex(-1);
       updateCounts();
       renderQuestionArea();
+      saveLocalConfig();
       await pushStateToFirebase();
       startTimer();
     }
@@ -1111,6 +1143,7 @@
       renderRosco();
       updateCounts();
       showFinalScreen(reason);
+      saveLocalConfig();
       await pushStateToFirebase();
     }
 
@@ -1125,7 +1158,8 @@
         await endGame('completed');
       } else {
         renderQuestionArea();
-        await pushStateToFirebase();
+        saveLocalConfig();
+      await pushStateToFirebase();
       }
     }
 
@@ -1137,7 +1171,8 @@
         await endGame('completed');
       } else {
         renderQuestionArea();
-        await pushStateToFirebase();
+        saveLocalConfig();
+      await pushStateToFirebase();
       }
     }
 
@@ -1164,6 +1199,7 @@
       finalOverlay.classList.add('hidden');
       renderRosco();
       updateCounts();
+      saveLocalConfig();
       await pushStateToFirebase();
     }
 
@@ -1179,6 +1215,7 @@
           status: 'unused'
         };
       });
+      localStorage.removeItem(STORAGE_KEY);
       letterInput.value = letters[0];
       loadLetterIntoForm(letters[0]);
       await restartGame();
@@ -1204,11 +1241,13 @@
       renderRosco();
       updateCounts();
       alert('Ejemplo cargado.');
+      saveLocalConfig();
       await pushStateToFirebase();
     }
 
     applyModeUI();
     initData();
+    loadLocalConfig();
     buildLetterSelector();
     buildRosco();
     loadLetterIntoForm(letters[0]);
@@ -1237,9 +1276,11 @@
     restartBtn.addEventListener('click', restartGame);
     closeFinalBtn.addEventListener('click', async () => {
       finalOverlay.classList.add('hidden');
-      if (isHost) await pushStateToFirebase();
+      if (isHost) saveLocalConfig();
+      await pushStateToFirebase();
     });
     playAgainBtn.addEventListener('click', startGame);
   </script>
 </body>
 </html>
+
