@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pasapalabra Interactivo Multidispositivo</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --panel-2: #1f2937;
+      --text: #f8fafc;
+      --muted: #cbd5e1;
+      --accent: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --info: #3b82f6;
+      --active: #a855f7;
+      --shadow: rgba(0, 0, 0, 0.28);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #020617 0%, #111827 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 2rem;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 24px;
+    }
+
+    .card {
+      background: rgba(17, 24, 39, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      box-shadow: 0 14px 40px var(--shadow);
+      padding: 20px;
+    }
+
+    .card h2 {
+      margin-top: 0;
+      font-size: 1.1rem;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin: 12px 0 6px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: var(--panel-2);
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .small {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    button {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 16px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.2s ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-primary { background: var(--info); }
+    .btn-success { background: var(--accent); }
+    .btn-warning { background: var(--warning); color: #111827; }
+    .btn-danger { background: var(--danger); }
+    .btn-neutral { background: #64748b; }
+
+    .game-top {
+      display: grid;
+      grid-template-columns: 1fr 260px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .rosco-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 500px;
+    }
+
+    .rosco {
+      position: relative;
+      width: 460px;
+      height: 460px;
+      border-radius: 50%;
+    }
+
+    .letter {
+      position: absolute;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      background: #334155;
+      border: 2px solid rgba(255,255,255,0.14);
+      user-select: none;
+      transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .letter.active {
+      background: var(--active);
+      transform: scale(1.12);
+      border-color: white;
+    }
+
+    .letter.correct { background: var(--accent); }
+    .letter.incorrect { background: var(--danger); }
+    .letter.pending {
+      background: var(--warning);
+      color: #111827;
+    }
+
+    .letter.unused { background: #334155; }
+
+    .center-panel {
+      position: absolute;
+      inset: 115px;
+      border-radius: 50%;
+      background: radial-gradient(circle at top, #1e293b, #0f172a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .center-panel .big-letter {
+      font-size: 3rem;
+      font-weight: bold;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .center-panel .status-text {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .scoreboard {
+      display: grid;
+      gap: 12px;
+    }
+
+    .score-box {
+      background: var(--panel-2);
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .score-box .label {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+
+    .score-box .value {
+      font-size: 1.8rem;
+      font-weight: bold;
+    }
+
+    .question-card { margin-top: 24px; }
+
+    .question-meta {
+      color: var(--warning);
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .question-text {
+      font-size: 1.2rem;
+      line-height: 1.6;
+      background: var(--panel-2);
+      border-radius: 16px;
+      padding: 18px;
+      min-height: 110px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .current-answer {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .timer-box .value.time-warning { color: var(--warning); }
+    .timer-box .value.time-danger { color: #fca5a5; }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.86);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 1000;
+    }
+
+    .overlay.hidden { display: none; }
+
+    .final-card {
+      width: min(560px, 100%);
+      background: linear-gradient(180deg, #111827 0%, #0f172a 100%);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+      padding: 28px;
+      text-align: center;
+    }
+
+    .final-card h2 {
+      margin: 0 0 10px;
+      font-size: 2rem;
+    }
+
+    .final-card p {
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    .final-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .final-stat {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .final-stat .number {
+      font-size: 1.8rem;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .final-stat .text {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .final-message {
+      font-size: 1.1rem;
+      margin-bottom: 18px;
+    }
+
+    .mode-banner {
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 14px;
+      background: rgba(59, 130, 246, 0.12);
+      border: 1px solid rgba(59, 130, 246, 0.28);
+      border-radius: 999px;
+      color: #bfdbfe;
+      margin-bottom: 16px;
+      font-size: 0.92rem;
+    }
+
+    .links-box, .room-box {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .links-box code, .room-box code {
+      display: block;
+      margin-top: 8px;
+      padding: 10px 12px;
+      background: #020617;
+      color: #cbd5e1;
+      border-radius: 10px;
+      word-break: break-all;
+      font-size: 0.85rem;
+    }
+
+    .status-pill {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      background: rgba(255,255,255,0.08);
+      color: var(--muted);
+    }
+
+    .player-layout .layout {
+      grid-template-columns: 1fr;
+    }
+
+    .player-layout #hostPanel,
+    .player-layout #hostControls,
+    .player-layout #answerPreview,
+    .player-layout #hostOnlyLinks {
+      display: none !important;
+    }
+
+    .player-layout .question-text {
+      min-height: 140px;
+      font-size: 1.4rem;
+    }
+
+    .player-layout .footer-note {
+      text-align: center;
+      font-size: 1rem;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: 1fr; }
+      .game-top { grid-template-columns: 1fr; }
+      .rosco {
+        width: 360px;
+        height: 360px;
+      }
+      .center-panel { inset: 90px; }
+      .letter {
+        width: 38px;
+        height: 38px;
+        font-size: 0.9rem;
+      }
+      .final-stats { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="mode-banner" id="modeBanner">Modo anfitrión</div>
+    <h1>Pasapalabra Interactivo Multidispositivo</h1>
+    <div class="subtitle" id="subtitleText">Versión en tiempo real con Firebase para usar en varios móviles u ordenadores.</div>
+
+    <div class="layout">
+      <div class="card" id="hostPanel">
+        <h2>Configurar juego</h2>
+
+        <div class="room-box">
+          <strong>Sala en tiempo real</strong>
+          <label for="roomIdInput">ID de sala</label>
+          <input id="roomIdInput" type="text" placeholder="Ejemplo: CUMPLE2026" />
+          <div class="button-row">
+            <button class="btn-primary" id="createRoomBtn">Crear sala</button>
+            <button class="btn-neutral" id="connectRoomBtn">Conectar a sala</button>
+          </div>
+          <div class="small">Primero crea la sala o conéctate a una. Luego comparte el enlace del jugador.</div>
+          <div class="status-pill" id="roomStatus">Sin sala conectada</div>
+        </div>
+
+        <label for="letterInput">Letra</label>
+        <select id="letterInput"></select>
+
+        <label for="hintTypeInput">Tipo de pista</label>
+        <select id="hintTypeInput">
+          <option value="con">Con la</option>
+          <option value="empieza">Empieza por la</option>
+          <option value="contiene">Contiene la</option>
+        </select>
+
+        <label for="questionInput">Definición / pista</label>
+        <textarea id="questionInput" placeholder="Ejemplo: lugar de la casa donde se prepara la comida"></textarea>
+
+        <label for="answerInput">Respuesta esperada</label>
+        <input id="answerInput" type="text" placeholder="Ejemplo: cocina" />
+
+        <label for="codeDigitInput">Cifra del código final (opcional)</label>
+        <input id="codeDigitInput" type="number" min="0" max="9" placeholder="Ejemplo: 7" />
+
+        <div class="small">
+          Asigna una cifra solo a 4 letras. Al final de la partida aparecerá el código completo en el orden de las letras del rosco.
+        </div>
+
+        <div class="button-row">
+          <button class="btn-primary" id="saveBtn">Guardar / actualizar</button>
+          <button class="btn-neutral" id="clearLetterBtn">Limpiar letra</button>
+        </div>
+
+        <div class="button-row">
+          <button class="btn-success" id="loadExampleBtn">Cargar ejemplo</button>
+          <button class="btn-warning" id="resetConfigBtn">Borrar todo</button>
+        </div>
+
+        <div class="small">
+          Consejo: no hace falta escribir durante la partida. Tú lees la pista, la persona responde en voz alta y luego pulsas el botón correspondiente.
+        </div>
+
+        <div class="links-box" id="hostOnlyLinks">
+          <strong>Enlace para el jugador</strong>
+          <div class="small">Compártelo cuando ya tengas una sala creada.</div>
+          <code id="playerLinkPreview">Crea una sala primero</code>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="game-top">
+          <div class="rosco-wrap">
+            <div class="rosco" id="rosco">
+              <div class="center-panel">
+                <div>
+                  <div class="big-letter" id="centerLetter">?</div>
+                  <div class="status-text" id="centerStatus">Configura preguntas y conecta la sala.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="scoreboard">
+            <div class="score-box timer-box">
+              <div class="label">Tiempo restante</div>
+              <div class="value" id="timerDisplay">05:00</div>
+            </div>
+            <div class="score-box">
+              <div class="label">Correctas</div>
+              <div class="value" id="correctCount">0</div>
+            </div>
+            <div class="score-box">
+              <div class="label">Incorrectas</div>
+              <div class="value" id="incorrectCount">0</div>
+            </div>
+            <div class="score-box">
+              <div class="label">Pendientes</div>
+              <div class="value" id="pendingCount">0</div>
+            </div>
+            <div class="score-box">
+              <div class="label">Estado</div>
+              <div class="value" id="gameState" style="font-size:1.1rem;">Sin empezar</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="question-card">
+          <div class="question-meta" id="questionMeta">Sin pregunta activa</div>
+          <div class="question-text" id="questionText">Añade preguntas a las letras que quieras usar.</div>
+          <div class="current-answer" id="answerPreview">Respuesta guardada: —</div>
+        </div>
+
+        <div class="button-row" id="hostControls">
+          <button class="btn-primary" id="startBtn">Empezar partida</button>
+          <button class="btn-success" id="correctBtn" disabled>Correcto</button>
+          <button class="btn-danger" id="incorrectBtn" disabled>Incorrecto</button>
+          <button class="btn-warning" id="passBtn" disabled>Pasapalabra</button>
+          <button class="btn-neutral" id="restartBtn">Reiniciar partida</button>
+        </div>
+
+        <div class="footer-note" id="footerNote">
+          “Incorrecto” elimina esa pregunta de la ronda. “Pasapalabra” la deja pendiente para volver a ella después. El temporizador dura 5 minutos.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="finalOverlay">
+    <div class="final-card">
+      <h2>Fin de la partida</h2>
+      <p id="finalReason">Se acabó el tiempo.</p>
+      <div class="final-stats">
+        <div class="final-stat">
+          <div class="number" id="finalCorrect">0</div>
+          <div class="text">Correctas</div>
+        </div>
+        <div class="final-stat">
+          <div class="number" id="finalIncorrect">0</div>
+          <div class="text">Incorrectas</div>
+        </div>
+        <div class="final-stat">
+          <div class="number" id="finalPending">0</div>
+          <div class="text">Sin resolver</div>
+        </div>
+      </div>
+      <div class="final-message" id="finalMessage">Buen trabajo, detective del rosco.</div>
+      <div class="final-stat" style="margin-bottom:18px;">
+        <div class="number" id="finalCode">----</div>
+        <div class="text">Código final</div>
+      </div>
+      <div class="button-row" style="justify-content:center;">
+        <button class="btn-primary" id="closeFinalBtn">Cerrar</button>
+        <button class="btn-success" id="playAgainBtn">Jugar otra vez</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js';
+    import { getFirestore, doc, setDoc, updateDoc, onSnapshot, getDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
+
+    // Reemplaza este objeto con la configuración real de tu proyecto Firebase.
+    // Puedes obtenerlo al registrar una app web en Firebase Console.
+    const firebaseConfig = {
+      apiKey: 'PEGA_AQUI_TU_API_KEY',
+      authDomain: 'PEGA_AQUI_TU_AUTH_DOMAIN',
+      projectId: 'PEGA_AQUI_TU_PROJECT_ID',
+      storageBucket: 'PEGA_AQUI_TU_STORAGE_BUCKET',
+      messagingSenderId: 'PEGA_AQUI_TU_MESSAGING_SENDER_ID',
+      appId: 'PEGA_AQUI_TU_APP_ID'
+    };
+
+    const firebaseConfigured = !Object.values(firebaseConfig).some(value => String(value).startsWith('PEGA_AQUI'));
+
+    const letters = ['A','B','C','D','E','F','G','H','I','J','L','M','N','O','P','Q','R','S','T','U','V','X','Y','Z'];
+    const STORAGE_KEY = 'pasapalabra_multidispositivo_local_v1';
+    const GAME_DURATION = 5 * 60;
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get('mode') === 'player' ? 'player' : 'host';
+    const isHost = mode === 'host';
+    const isPlayer = mode === 'player';
+
+    const gameData = {};
+    let currentIndex = -1;
+    let started = false;
+    let timeLeft = GAME_DURATION;
+    let timerInterval = null;
+    let db = null;
+    let roomId = params.get('room') || '';
+    let roomUnsubscribe = null;
+    let suppressRemoteApply = false;
+
+    const letterInput = document.getElementById('letterInput');
+    const hintTypeInput = document.getElementById('hintTypeInput');
+    const questionInput = document.getElementById('questionInput');
+    const answerInput = document.getElementById('answerInput');
+    const codeDigitInput = document.getElementById('codeDigitInput');
+    const roomIdInput = document.getElementById('roomIdInput');
+    const createRoomBtn = document.getElementById('createRoomBtn');
+    const connectRoomBtn = document.getElementById('connectRoomBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const clearLetterBtn = document.getElementById('clearLetterBtn');
+    const loadExampleBtn = document.getElementById('loadExampleBtn');
+    const resetConfigBtn = document.getElementById('resetConfigBtn');
+    const playerLinkPreview = document.getElementById('playerLinkPreview');
+    const roomStatus = document.getElementById('roomStatus');
+
+    const rosco = document.getElementById('rosco');
+    const centerLetter = document.getElementById('centerLetter');
+    const centerStatus = document.getElementById('centerStatus');
+    const questionMeta = document.getElementById('questionMeta');
+    const questionText = document.getElementById('questionText');
+    const answerPreview = document.getElementById('answerPreview');
+
+    const startBtn = document.getElementById('startBtn');
+    const correctBtn = document.getElementById('correctBtn');
+    const incorrectBtn = document.getElementById('incorrectBtn');
+    const passBtn = document.getElementById('passBtn');
+    const restartBtn = document.getElementById('restartBtn');
+
+    const correctCount = document.getElementById('correctCount');
+    const incorrectCount = document.getElementById('incorrectCount');
+    const pendingCount = document.getElementById('pendingCount');
+    const gameState = document.getElementById('gameState');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const modeBanner = document.getElementById('modeBanner');
+    const subtitleText = document.getElementById('subtitleText');
+    const footerNote = document.getElementById('footerNote');
+
+    const finalOverlay = document.getElementById('finalOverlay');
+    const finalReason = document.getElementById('finalReason');
+    const finalCorrect = document.getElementById('finalCorrect');
+    const finalIncorrect = document.getElementById('finalIncorrect');
+    const finalPending = document.getElementById('finalPending');
+    const finalMessage = document.getElementById('finalMessage');
+    const finalCode = document.getElementById('finalCode');
+    const closeFinalBtn = document.getElementById('closeFinalBtn');
+    const playAgainBtn = document.getElementById('playAgainBtn');
+
+    function applyModeUI() {
+      if (isPlayer) {
+        document.body.classList.add('player-layout');
+        modeBanner.textContent = 'Modo jugador · vista limpia sin respuestas';
+        subtitleText.textContent = 'Vista sincronizada en tiempo real. Aquí no se muestran respuestas ni botones de control.';
+        footerNote.textContent = 'Esperando al anfitrión. Las preguntas y el rosco se actualizarán en tiempo real.';
+      } else {
+        modeBanner.textContent = 'Modo anfitrión · control total';
+        subtitleText.textContent = 'Versión en tiempo real con Firebase para usar en varios móviles u ordenadores.';
+      }
+    }
+
+    function initFirebase() {
+      if (!firebaseConfigured) {
+        roomStatus.textContent = 'Falta configurar Firebase en el código';
+        alert('Antes de usar el modo multidispositivo, pega tu firebaseConfig real en el archivo HTML.');
+        return false;
+      }
+      const app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+      return true;
+    }
+
+    function initData() {
+      letters.forEach(letter => {
+        gameData[letter] = {
+          letter,
+          hintType: 'con',
+          question: '',
+          answer: '',
+          codeDigit: '',
+          status: 'unused'
+        };
+      });
+    }
+
+    function saveLocalConfig() {
+      const payload = {};
+      letters.forEach(letter => {
+        payload[letter] = {
+          hintType: gameData[letter].hintType,
+          question: gameData[letter].question,
+          answer: gameData[letter].answer,
+          codeDigit: gameData[letter].codeDigit
+        };
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    }
+
+    function loadLocalConfig() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      try {
+        const saved = JSON.parse(raw);
+        letters.forEach(letter => {
+          if (saved[letter]) {
+            gameData[letter].hintType = saved[letter].hintType || 'con';
+            gameData[letter].question = saved[letter].question || '';
+            gameData[letter].answer = saved[letter].answer || '';
+            gameData[letter].codeDigit = saved[letter].codeDigit || '';
+            gameData[letter].status = gameData[letter].question ? 'pending' : 'unused';
+          }
+        });
+      } catch (error) {
+        console.error('No se pudo cargar la configuración guardada.', error);
+      }
+    }
+
+    function buildLetterSelector() {
+      letters.forEach(letter => {
+        const option = document.createElement('option');
+        option.value = letter;
+        option.textContent = letter;
+        letterInput.appendChild(option);
+      });
+    }
+
+    function buildRosco() {
+      const radius = 195;
+      const center = 230;
+      letters.forEach((letter, index) => {
+        const angle = ((Math.PI * 2) / letters.length) * index - Math.PI / 2;
+        const x = center + radius * Math.cos(angle) - 23;
+        const y = center + radius * Math.sin(angle) - 23;
+        const node = document.createElement('div');
+        node.className = 'letter unused';
+        node.id = `letter-${letter}`;
+        node.textContent = letter;
+        node.style.left = `${x}px`;
+        node.style.top = `${y}px`;
+        rosco.appendChild(node);
+      });
+    }
+
+    function normalizeRoomId(value) {
+      return value.trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 30);
+    }
+
+    function generateRoomId() {
+      return `SALA-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+    }
+
+    function getRoomRef() {
+      if (!db || !roomId) return null;
+      return doc(db, 'pasapalabraRooms', roomId);
+    }
+
+    function getPlayerLink() {
+      const url = new URL(window.location.href);
+      url.searchParams.set('mode', 'player');
+      url.searchParams.set('room', roomId);
+      return url.toString();
+    }
+
+    function deepCloneData(data) {
+      return JSON.parse(JSON.stringify(data));
+    }
+
+    function getShareableState() {
+      return {
+        roomId,
+        mode: 'host',
+        currentIndex,
+        started,
+        timeLeft,
+        gameStateText: gameState.textContent,
+        gameData: deepCloneData(gameData),
+        finalVisible: !finalOverlay.classList.contains('hidden'),
+        finalPayload: {
+          reason: finalReason.textContent,
+          correct: finalCorrect.textContent,
+          incorrect: finalIncorrect.textContent,
+          pending: finalPending.textContent,
+          message: finalMessage.textContent,
+          code: finalCode.textContent
+        },
+        updatedAt: Date.now()
+      };
+    }
+
+    async function pushStateToFirebase() {
+      if (!isHost || !roomId || !db) return;
+      const roomRef = getRoomRef();
+      if (!roomRef) return;
+      await setDoc(roomRef, {
+        ...getShareableState(),
+        updatedServerAt: serverTimestamp()
+      }, { merge: true });
+    }
+
+    function loadLetterIntoForm(letter) {
+      const item = gameData[letter];
+      hintTypeInput.value = item.hintType || 'con';
+      questionInput.value = item.question || '';
+      answerInput.value = item.answer || '';
+      codeDigitInput.value = item.codeDigit || '';
+    }
+
+    function renderRosco() {
+      letters.forEach(letter => {
+        const node = document.getElementById(`letter-${letter}`);
+        if (!node) return;
+        node.className = 'letter';
+        const item = gameData[letter];
+        node.classList.add(item.status || 'unused');
+        if (currentIndex >= 0 && letters[currentIndex] === letter) {
+          node.classList.add('active');
+        }
+      });
+    }
+
+    function getStats() {
+      const values = Object.values(gameData).filter(item => item.question);
+      return {
+        correct: values.filter(item => item.status === 'correct').length,
+        incorrect: values.filter(item => item.status === 'incorrect').length,
+        pending: values.filter(item => item.status === 'pending').length,
+        total: values.length
+      };
+    }
+
+    function getFinalCode() {
+      return letters
+        .map(letter => gameData[letter])
+        .filter(item => item.question && item.codeDigit !== '')
+        .map(item => String(item.codeDigit))
+        .join('');
+    }
+
+    function updateCounts() {
+      const stats = getStats();
+      correctCount.textContent = stats.correct;
+      incorrectCount.textContent = stats.incorrect;
+      pendingCount.textContent = stats.pending;
+    }
+
+    function getQuestionPrefix(item) {
+      if (item.hintType === 'empieza') return `Empieza por la ${item.letter}:`;
+      if (item.hintType === 'contiene') return `Contiene la ${item.letter}:`;
+      return `Con la ${item.letter}:`;
+    }
+
+    function findNextPendingIndex(startFrom) {
+      for (let step = 1; step <= letters.length; step++) {
+        const idx = (startFrom + step) % letters.length;
+        const item = gameData[letters[idx]];
+        if (item.question && item.status === 'pending') return idx;
+      }
+      return -1;
+    }
+
+    function renderQuestionArea() {
+      if (currentIndex === -1) {
+        centerLetter.textContent = started ? '✓' : '?';
+        centerStatus.textContent = started ? 'Partida terminada' : 'Configura preguntas y conecta la sala.';
+        questionMeta.textContent = started ? 'No quedan preguntas pendientes' : 'Sin pregunta activa';
+        questionText.textContent = started ? 'Has completado el rosco.' : 'Añade preguntas a las letras que quieras usar.';
+        answerPreview.textContent = isHost ? 'Respuesta guardada: —' : '';
+        if (isHost) {
+          correctBtn.disabled = true;
+          incorrectBtn.disabled = true;
+          passBtn.disabled = true;
+        }
+        gameState.textContent = started ? 'En juego' : 'Sin empezar';
+        renderRosco();
+        return;
+      }
+
+      const item = gameData[letters[currentIndex]];
+      centerLetter.textContent = item.letter;
+      centerStatus.textContent = 'Pregunta activa';
+      questionMeta.textContent = `${getQuestionPrefix(item)}`;
+      questionText.textContent = item.question || 'Esta letra no tiene pregunta.';
+      if (isHost) {
+        answerPreview.textContent = `Respuesta guardada: ${item.answer || '—'}${item.codeDigit !== '' ? ` · Cifra final: ${item.codeDigit}` : ''}`;
+        correctBtn.disabled = false;
+        incorrectBtn.disabled = false;
+        passBtn.disabled = false;
+      } else {
+        answerPreview.textContent = '';
+      }
+      gameState.textContent = started ? 'En juego' : 'Sin empezar';
+      renderRosco();
+    }
+
+    function formatTime(seconds) {
+      const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
+      const secs = String(seconds % 60).padStart(2, '0');
+      return `${mins}:${secs}`;
+    }
+
+    function updateTimerDisplay() {
+      timerDisplay.textContent = formatTime(timeLeft);
+      timerDisplay.classList.remove('time-warning', 'time-danger');
+      if (timeLeft <= 60) timerDisplay.classList.add('time-danger');
+      else if (timeLeft <= 120) timerDisplay.classList.add('time-warning');
+    }
+
+    function playTone(type) {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      const ctx = new AudioContextClass();
+      const now = ctx.currentTime;
+
+      function makeOsc(typeOsc, freq, start, duration, gain = 0.12) {
+        const osc = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        osc.type = typeOsc;
+        osc.frequency.setValueAtTime(freq, start);
+        gainNode.gain.setValueAtTime(0.0001, start);
+        gainNode.gain.exponentialRampToValueAtTime(gain, start + 0.02);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+        osc.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        osc.start(start);
+        osc.stop(start + duration + 0.02);
+      }
+
+      if (type === 'correct') {
+        makeOsc('sine', 523.25, now, 0.12, 0.11);
+        makeOsc('sine', 659.25, now + 0.10, 0.12, 0.11);
+        makeOsc('triangle', 783.99, now + 0.20, 0.18, 0.10);
+      } else if (type === 'pass') {
+        makeOsc('triangle', 440, now, 0.10, 0.09);
+        makeOsc('triangle', 554.37, now + 0.08, 0.12, 0.09);
+      } else if (type === 'incorrect') {
+        makeOsc('sawtooth', 320, now, 0.12, 0.10);
+        makeOsc('sawtooth', 240, now + 0.10, 0.16, 0.09);
+      } else if (type === 'win') {
+        makeOsc('sine', 523.25, now, 0.10, 0.10);
+        makeOsc('sine', 659.25, now + 0.08, 0.10, 0.10);
+        makeOsc('sine', 783.99, now + 0.16, 0.10, 0.10);
+        makeOsc('triangle', 1046.5, now + 0.28, 0.28, 0.11);
+      } else if (type === 'lose') {
+        makeOsc('square', 293.66, now, 0.12, 0.09);
+        makeOsc('square', 246.94, now + 0.12, 0.12, 0.09);
+        makeOsc('square', 196.0, now + 0.24, 0.24, 0.08);
+      }
+
+      setTimeout(() => ctx.close(), 900);
+    }
+
+    function showFinalScreen(reason) {
+      const stats = getStats();
+      finalCorrect.textContent = stats.correct;
+      finalIncorrect.textContent = stats.incorrect;
+      finalPending.textContent = stats.pending;
+      finalReason.textContent = reason === 'time'
+        ? 'Se acabó el tiempo de 5 minutos. Usa el código para seguir con el Escape Room.'
+        : 'Ya no quedan preguntas pendientes. Usa el código para seguir con el Escape Room.';
+      finalMessage.textContent = getFinalMessage(stats, reason);
+      finalCode.textContent = getFinalCode() || '----';
+      finalOverlay.classList.remove('hidden');
+
+      const lostByTime = reason === 'time' && stats.pending > 0;
+      playTone(lostByTime ? 'lose' : 'win');
+    }
+
+    function getFinalMessage(stats, reason) {
+      if (reason === 'time') {
+        if (stats.correct === stats.total) return 'El reloj rugió, pero ya lo teníais domado.';
+        if (stats.correct >= Math.ceil(stats.total * 0.7)) return 'Muy buena ronda. El cronómetro casi os muerde, pero salisteis vivos.';
+        if (stats.correct >= Math.ceil(stats.total * 0.4)) return 'Ronda digna. Hubo gloria, hubo caos y hubo pasapalabras heroicos.';
+        return 'Partida intensa. El tiempo hizo de villano clásico.';
+      }
+      return stats.correct === stats.total
+        ? 'Rosco limpio. Eso ya es una pequeña hazaña doméstica.'
+        : 'Rosco completado. Caso cerrado y botones humeando.';
+    }
+
+    function applyRemoteState(payload) {
+      suppressRemoteApply = true;
+      Object.keys(payload.gameData || {}).forEach(letter => {
+        if (gameData[letter]) gameData[letter] = payload.gameData[letter];
+      });
+      currentIndex = payload.currentIndex ?? -1;
+      started = payload.started ?? false;
+      timeLeft = payload.timeLeft ?? GAME_DURATION;
+      gameState.textContent = payload.gameStateText || (started ? 'En juego' : 'Sin empezar');
+      updateCounts();
+      updateTimerDisplay();
+      renderRosco();
+      renderQuestionArea();
+      if (payload.finalVisible) {
+        finalReason.textContent = payload.finalPayload?.reason || '';
+        finalCorrect.textContent = payload.finalPayload?.correct || '0';
+        finalIncorrect.textContent = payload.finalPayload?.incorrect || '0';
+        finalPending.textContent = payload.finalPayload?.pending || '0';
+        finalMessage.textContent = payload.finalPayload?.message || '';
+        finalCode.textContent = payload.finalPayload?.code || '----';
+        finalOverlay.classList.remove('hidden');
+      } else {
+        finalOverlay.classList.add('hidden');
+      }
+      suppressRemoteApply = false;
+    }
+
+    async function listenToRoom() {
+      if (roomUnsubscribe) roomUnsubscribe();
+      const roomRef = getRoomRef();
+      if (!roomRef) return;
+      roomUnsubscribe = onSnapshot(roomRef, (snapshot) => {
+        if (!snapshot.exists()) return;
+        const data = snapshot.data();
+        if (isPlayer) applyRemoteState(data);
+      });
+    }
+
+    async function createRoom() {
+      if (!db) return;
+      roomId = normalizeRoomId(roomIdInput.value) || generateRoomId();
+      roomIdInput.value = roomId;
+      const roomRef = getRoomRef();
+      await setDoc(roomRef, {
+        roomId,
+        createdAt: serverTimestamp(),
+        gameData: deepCloneData(gameData),
+        currentIndex: -1,
+        started: false,
+        timeLeft: GAME_DURATION,
+        gameStateText: 'Sin empezar',
+        finalVisible: false,
+        finalPayload: {
+          reason: '', correct: '0', incorrect: '0', pending: '0', message: '', code: '----'
+        }
+      }, { merge: true });
+      roomStatus.textContent = `Sala conectada: ${roomId}`;
+      playerLinkPreview.textContent = getPlayerLink();
+      history.replaceState({}, '', `${window.location.pathname}?room=${encodeURIComponent(roomId)}`);
+      await listenToRoom();
+      saveLocalConfig();
+      await pushStateToFirebase();
+    }
+
+    async function connectToRoom() {
+      if (!db) return;
+      roomId = normalizeRoomId(roomIdInput.value || roomId);
+      if (!roomId) {
+        alert('Escribe un ID de sala o crea una automáticamente.');
+        return;
+      }
+      roomIdInput.value = roomId;
+      const roomRef = getRoomRef();
+      const snapshot = await getDoc(roomRef);
+      if (!snapshot.exists()) {
+        alert('Esa sala no existe todavía. Crea la sala primero desde el modo anfitrión.');
+        return;
+      }
+      roomStatus.textContent = `Sala conectada: ${roomId}`;
+      if (isHost) {
+        playerLinkPreview.textContent = getPlayerLink();
+        history.replaceState({}, '', `${window.location.pathname}?room=${encodeURIComponent(roomId)}`);
+      } else {
+        history.replaceState({}, '', `${window.location.pathname}?mode=player&room=${encodeURIComponent(roomId)}`);
+      }
+      await listenToRoom();
+      if (isPlayer) applyRemoteState(snapshot.data());
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      timerInterval = setInterval(async () => {
+        timeLeft -= 1;
+        updateTimerDisplay();
+        if (timeLeft <= 0) {
+          timeLeft = 0;
+          updateTimerDisplay();
+          await endGame('time');
+          return;
+        }
+        saveLocalConfig();
+      await pushStateToFirebase();
+      }, 1000);
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+
+    async function saveCurrentLetterFields() {
+      const letter = letterInput.value;
+      gameData[letter].hintType = hintTypeInput.value;
+      gameData[letter].question = questionInput.value.trim();
+      gameData[letter].answer = answerInput.value.trim();
+      gameData[letter].codeDigit = codeDigitInput.value.trim();
+      if (!started) gameData[letter].status = gameData[letter].question ? 'pending' : 'unused';
+      renderRosco();
+      updateCounts();
+      alert(`Letra ${letter} guardada.`);
+      saveLocalConfig();
+      await pushStateToFirebase();
+    }
+
+    async function clearCurrentLetter() {
+      const letter = letterInput.value;
+      gameData[letter] = {
+        letter,
+        hintType: 'con',
+        question: '',
+        answer: '',
+        codeDigit: '',
+        status: started ? gameData[letter].status : 'unused'
+      };
+      loadLetterIntoForm(letter);
+      if (!started) gameData[letter].status = 'unused';
+      renderRosco();
+      updateCounts();
+      saveLocalConfig();
+      await pushStateToFirebase();
+    }
+
+    async function startGame() {
+      if (!roomId) {
+        alert('Crea o conecta una sala antes de empezar.');
+        return;
+      }
+      const configured = Object.values(gameData).filter(item => item.question);
+      if (configured.length === 0) {
+        alert('Añade al menos una pregunta antes de empezar.');
+        return;
+      }
+      finalOverlay.classList.add('hidden');
+      started = true;
+      timeLeft = GAME_DURATION;
+      updateTimerDisplay();
+      Object.values(gameData).forEach(item => {
+        item.status = item.question ? 'pending' : 'unused';
+      });
+      currentIndex = findNextPendingIndex(-1);
+      updateCounts();
+      renderQuestionArea();
+      saveLocalConfig();
+      await pushStateToFirebase();
+      startTimer();
+    }
+
+    async function endGame(reason) {
+      started = false;
+      stopTimer();
+      currentIndex = -1;
+      centerLetter.textContent = '✓';
+      centerStatus.textContent = reason === 'time' ? 'Tiempo agotado' : 'Partida completada';
+      questionMeta.textContent = 'Fin de la partida';
+      questionText.textContent = reason === 'time' ? 'El cronómetro llegó a cero.' : 'No quedan preguntas pendientes.';
+      answerPreview.textContent = isHost ? 'Respuesta guardada: —' : '';
+      if (isHost) {
+        correctBtn.disabled = true;
+        incorrectBtn.disabled = true;
+        passBtn.disabled = true;
+      }
+      gameState.textContent = reason === 'time' ? 'Tiempo agotado' : 'Finalizado';
+      renderRosco();
+      updateCounts();
+      showFinalScreen(reason);
+      saveLocalConfig();
+      await pushStateToFirebase();
+    }
+
+    async function markAnswer(result) {
+      if (!started || currentIndex === -1) return;
+      const currentLetter = letters[currentIndex];
+      gameData[currentLetter].status = result;
+      playTone(result);
+      updateCounts();
+      currentIndex = findNextPendingIndex(currentIndex);
+      if (currentIndex === -1) {
+        await endGame('completed');
+      } else {
+        renderQuestionArea();
+        saveLocalConfig();
+      await pushStateToFirebase();
+      }
+    }
+
+    async function passAnswer() {
+      if (!started || currentIndex === -1) return;
+      playTone('pass');
+      currentIndex = findNextPendingIndex(currentIndex);
+      if (currentIndex === -1) {
+        await endGame('completed');
+      } else {
+        renderQuestionArea();
+        saveLocalConfig();
+      await pushStateToFirebase();
+      }
+    }
+
+    async function restartGame() {
+      started = false;
+      stopTimer();
+      currentIndex = -1;
+      timeLeft = GAME_DURATION;
+      updateTimerDisplay();
+      Object.values(gameData).forEach(item => {
+        item.status = item.question ? 'pending' : 'unused';
+      });
+      centerLetter.textContent = '?';
+      centerStatus.textContent = 'Configura preguntas y conecta la sala.';
+      questionMeta.textContent = 'Sin pregunta activa';
+      questionText.textContent = 'Añade preguntas a las letras que quieras usar.';
+      answerPreview.textContent = isHost ? 'Respuesta guardada: —' : '';
+      if (isHost) {
+        correctBtn.disabled = true;
+        incorrectBtn.disabled = true;
+        passBtn.disabled = true;
+      }
+      gameState.textContent = 'Sin empezar';
+      finalOverlay.classList.add('hidden');
+      renderRosco();
+      updateCounts();
+      saveLocalConfig();
+      await pushStateToFirebase();
+    }
+
+    async function resetConfiguration() {
+      if (!confirm('Esto borrará todas las preguntas guardadas.')) return;
+      letters.forEach(letter => {
+        gameData[letter] = {
+          letter,
+          hintType: 'con',
+          question: '',
+          answer: '',
+          codeDigit: '',
+          status: 'unused'
+        };
+      });
+      localStorage.removeItem(STORAGE_KEY);
+      letterInput.value = letters[0];
+      loadLetterIntoForm(letters[0]);
+      await restartGame();
+    }
+
+    async function loadExample() {
+      const example = {
+        A: { hintType: 'con', question: 'objeto donde apuntas pistas durante una investigación', answer: 'agenda o libreta', codeDigit: '' },
+        C: { hintType: 'con', question: 'lugar de la casa donde se prepara la comida', answer: 'cocina', codeDigit: '7' },
+        H: { hintType: 'con', question: 'electrodoméstico donde no sería raro esconder algo en una gymkana', answer: 'horno', codeDigit: '2' },
+        M: { hintType: 'con', question: 'objeto grande de viaje donde cabe mucha ropa', answer: 'maleta', codeDigit: '4' },
+        P: { hintType: 'empieza', question: 'juego en el que puedes decir “paso” y volver más tarde', answer: 'pasapalabra', codeDigit: '' },
+        T: { hintType: 'con', question: 'parte exterior de una casa o piso', answer: 'terraza', codeDigit: '9' }
+      };
+      Object.keys(example).forEach(letter => {
+        gameData[letter].hintType = example[letter].hintType;
+        gameData[letter].question = example[letter].question;
+        gameData[letter].answer = example[letter].answer;
+        gameData[letter].codeDigit = example[letter].codeDigit || '';
+        if (!started) gameData[letter].status = 'pending';
+      });
+      loadLetterIntoForm(letterInput.value);
+      renderRosco();
+      updateCounts();
+      alert('Ejemplo cargado.');
+      saveLocalConfig();
+      await pushStateToFirebase();
+    }
+
+    applyModeUI();
+    initData();
+    loadLocalConfig();
+    buildLetterSelector();
+    buildRosco();
+    loadLetterIntoForm(letters[0]);
+    renderRosco();
+    updateCounts();
+    updateTimerDisplay();
+    renderQuestionArea();
+
+    if (roomId) roomIdInput.value = roomId;
+
+    if (initFirebase()) {
+      if (roomId) connectToRoom();
+    }
+
+    createRoomBtn.addEventListener('click', createRoom);
+    connectRoomBtn.addEventListener('click', connectToRoom);
+    saveBtn.addEventListener('click', saveCurrentLetterFields);
+    clearLetterBtn.addEventListener('click', clearCurrentLetter);
+    loadExampleBtn.addEventListener('click', loadExample);
+    resetConfigBtn.addEventListener('click', resetConfiguration);
+    letterInput.addEventListener('change', (e) => loadLetterIntoForm(e.target.value));
+    startBtn.addEventListener('click', startGame);
+    correctBtn.addEventListener('click', () => markAnswer('correct'));
+    incorrectBtn.addEventListener('click', () => markAnswer('incorrect'));
+    passBtn.addEventListener('click', passAnswer);
+    restartBtn.addEventListener('click', restartGame);
+    closeFinalBtn.addEventListener('click', async () => {
+      finalOverlay.classList.add('hidden');
+      if (isHost) saveLocalConfig();
+      await pushStateToFirebase();
+    });
+    playAgainBtn.addEventListener('click', startGame);
+  </script>
+</body>
+</html>
