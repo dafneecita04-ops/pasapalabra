@@ -849,7 +849,7 @@
     function renderQuestionArea() {
       if (currentIndex === -1) {
         centerLetter.textContent = started ? '✓' : '?';
-        centerStatus.textContent = started ? 'Partida terminada' : 'Configura preguntas y conecta la sala.';
+        centerStatus.textContent = started ? 'Partida terminada' : 'Espera a que empiece el juego.';
         questionMeta.textContent = started ? 'No quedan preguntas pendientes' : 'Sin pregunta activa';
         questionText.textContent = started ? 'Has completado el rosco.' : 'Añade preguntas a las letras que quieras usar.';
         answerPreview.textContent = isHost ? 'Respuesta guardada: —' : '';
@@ -1193,9 +1193,9 @@
         item.status = item.question ? 'pending' : 'unused';
       });
       centerLetter.textContent = '?';
-      centerStatus.textContent = 'Configura preguntas y conecta la sala.';
+      centerStatus.textContent = 'Espera a que empiece el juego.';
       questionMeta.textContent = 'Sin pregunta activa';
-      questionText.textContent = 'Añade preguntas a las letras que quieras usar.';
+      questionText.textContent = 'La suerte está echada, confía en ellos... o no.';
       answerPreview.textContent = isHost ? 'Respuesta guardada: —' : '';
       if (isHost) {
         correctBtn.disabled = true;
