@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pasapalabra Interactivo Multidispositivo</title>
+  <title>El rosco de la semana: Juanma</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -472,7 +472,7 @@
               <div class="center-panel">
                 <div>
                   <div class="big-letter" id="centerLetter">?</div>
-                  <div class="status-text" id="centerStatus">Configura preguntas y conecta la sala.</div>
+                  <div class="status-text" id="centerStatus">Contesta el rosco correctamente y llévate un código.</div>
                 </div>
               </div>
             </div>
@@ -638,8 +638,8 @@
     function applyModeUI() {
       if (isPlayer) {
         document.body.classList.add('player-layout');
-        modeBanner.textContent = 'Modo jugador · vista limpia sin respuestas';
-        subtitleText.textContent = 'Vista sincronizada en tiempo real. Aquí no se muestran respuestas ni botones de control.';
+        modeBanner.textContent = 'Modo Juanma · Sin respuestas';
+        subtitleText.textContent = '¿Te conocen tan bien como crees? Todos los invitados deberán contestar las preguntas correctamente, así podrás seguir con el juego. Si alguna pregunta se les engancha a todos, podrás responder tú por ellos.';
         footerNote.textContent = 'Esperando al anfitrión. Las preguntas y el rosco se actualizarán en tiempo real.';
       } else {
         modeBanner.textContent = 'Modo anfitrión · control total';
